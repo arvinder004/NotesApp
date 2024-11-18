@@ -8,6 +8,8 @@ import Modal from "react-modal"
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../utils/axiosInstance";
 import Toast from "../../components/ToastMessage/Toast";
+import EmptyCard from "../../components/EmptyCard/EmptyCard";
+import addNote from "../../assets/bxs-add-to-queue.svg"
 
 const Home = () => {
 
@@ -25,6 +27,8 @@ const Home = () => {
 
     const [allNotes, setAllNotes] = useState([])
     const [userInfo, setUserInfo] = useState(null);
+    const [isSearch, setIsSearch] = useState(false);
+
     const navigate = useNavigate();
 
     const handleEdit = (noteDetails) =>{
@@ -80,14 +84,10 @@ const Home = () => {
         const noteId = data._id;
 
         try{
-            const response = await axiosInstance.delete("/delete-note/" + noteId, {
-                title,
-                content,
-                tags,
-            });
+            const response = await axiosInstance.delete("/delete-note/" + noteId);
 
             if(response.data && !response.data.error){
-                showToastMessage("note deleted successfully")
+                showToastMessage('delete', "note deleted successfully")
                 getAllNotes();
                 onClose();
             }
@@ -99,6 +99,26 @@ const Home = () => {
 
     }
 
+    const onSearchNote = async(query)=>{
+        try{
+            const response = await axiosInstance.get("/search-notes", {
+                params: {query},
+            });
+            if(response.data && response.data.notes){
+                setIsSearch(true);
+                setAllNotes(response.data.notes);
+            }
+        } catch(error){
+            console.log(error);
+            
+        }
+    }
+
+    const handleClearSearch = () =>{
+        setIsSearch(false);
+        getAllNotes();
+    }
+
     useEffect(() => {
         getAllNotes();
         getUserInfo();
@@ -107,10 +127,10 @@ const Home = () => {
 
     return (
         <>
-            <Navbar userInfo={userInfo} />
+            <Navbar userInfo={userInfo} onSearchNote={onSearchNote} handleClearSearch={handleClearSearch}/>
 
             <div className="container mx-auto">
-                <div className="grid grid-cols-3 gap-4 mt-8 ">
+                {allNotes.length > 0 ? <div className="grid grid-cols-3 gap-4 mt-8 ">
                     {allNotes.map((item, index) => (
                         <NoteCard
                             key={item._id}
@@ -124,7 +144,7 @@ const Home = () => {
                             onPinNote={() => { }}
                         />
                     ))}
-                </div>
+                </div> : <EmptyCard imgSrc = {addNote} message='start adding your first note! click the add button to write your ideas, thoughts, reminders and more. lets get started.'/>}
             </div>
 
             <button
