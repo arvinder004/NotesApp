@@ -9,7 +9,10 @@ export const getInitials = (name) =>{
     const words = name.split(" ");
     let initials = "";
 
-    for(let i=0; i<Math.min(words.length, 1); i++){
+    for(let i=0; i<Math.max(words.length, 1); i++){
+        if(words[i][0] == undefined){
+            continue;
+        }
         initials += words[i][0];
     }
 
