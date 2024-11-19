@@ -10,6 +10,7 @@ import axiosInstance from "../../utils/axiosInstance";
 import Toast from "../../components/ToastMessage/Toast";
 import EmptyCard from "../../components/EmptyCard/EmptyCard";
 import addNote from "../../assets/bxs-add-to-queue.svg"
+import noData from "../../assets/paper.png";
 
 const Home = () => {
 
@@ -114,6 +115,23 @@ const Home = () => {
         }
     }
 
+    const updateIsPinned = async (noteData) => {
+        const noteId = noteData._id;
+
+        try{
+            const response = await axiosInstance.put("/update-note-pinned/" + noteId,{
+                "isPinned": !noteData.isPinned,
+            });
+
+            if(response.data && response.data.note){
+                showToastMessage('add',"note updated successfully")
+                getAllNotes();
+            }
+        } catch(error){
+                console.log(error);
+        }
+    }
+
     const handleClearSearch = () =>{
         setIsSearch(false);
         getAllNotes();
@@ -141,10 +159,10 @@ const Home = () => {
                             isPinned={item.isPinned}
                             onEdit={() => handleEdit(item)}
                             onDelete={() => deleteNote(item)}
-                            onPinNote={() => { }}
+                            onPinNote={() => updateIsPinned(item)}
                         />
                     ))}
-                </div> : <EmptyCard imgSrc = {addNote} message='start adding your first note! click the add button to write your ideas, thoughts, reminders and more. lets get started.'/>}
+                </div> : <EmptyCard imgSrc = {isSearch ? noData : addNote} message={isSearch ? `Oops, No Note found matching your search` : `start adding your first note! click the add button to write your ideas, thoughts, reminders and more. lets get started.`}/>}
             </div>
 
             <button
